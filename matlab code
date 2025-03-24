@@ -1,0 +1,72 @@
+1.	Launch MATLAB and Simulink:
+o	Open MATLAB and enter simulink in the command window.
+2.	Create a New Model:
+o	Go to File → New → Model.
+3.	Design the Control Logic:
+o	Use blocks like Stateflow or Logic Blocks to implement:
+	Left Indicator Control
+	Right Indicator Control
+	Hazard Light Control
+	LED Toggle using a Timer (300 ms)
+o	Implement state transitions using button inputs and simulate LED outputs.
+________________________________________
+✅ Step 2: Configure Code Generation
+1.	Open Model Configuration:
+o	Go to Simulation → Model Configuration Parameters → Code Generation.
+2.	Select Code Generation Tool:
+o	Choose Embedded Coder for optimized embedded code.
+3.	Set Target Hardware:
+o	Select the microcontroller (e.g., STM32, Arduino).
+4.	Configure Additional Settings:
+o	Enable Generate Code Only if you don’t want to build.
+o	Ensure the model is set for Fixed Step simulation using a step size of 100 ms.
+________________________________________
+✅ Step 3: Generate C Code
+1.	Generate the Code:
+o	Click on Code → C/C++ Code → Build Model.
+o	MATLAB will generate .c and .h files in a codegen folder.
+2.	Review Code:
+o	Open model.c and model.h to ensure the correct logic and state management were implemented.
+________________________________________
+✅ Step 4: Integrate with Base Software
+1.	Include the Generated Code:
+o	Copy the generated .c and .h files to your embedded software project.
+o	Include the headers in your base software using:
+c
+#include "model.h"
+2.	Initialize and Start the Model:
+o	Call the initialization function:
+C-programming:-
+model_initialize();
+o	Create a loop to call the step function every 100 ms:
+C-programming:-
+while (1) {
+    model_step();
+    delay_ms(100); // Assume a timer delay function
+}
+3.	Connect with GPIO and LEDs:
+o	Implement functions to read button inputs and control the LED outputs:
+
+C-programming:-
+if (leftButtonPressed()) {
+    model_input.LeftButton = 1;
+} else {
+    model_input.LeftButton = 0;
+}
+
+if (rightButtonPressed()) {
+    model_input.RightButton = 1;
+} else {
+    model_input.RightButton = 0;
+}
+
+if (model_output.LeftLED) {
+    setLEDPin(LEFT_LED_PIN, HIGH);
+} else {
+    setLEDPin(LEFT_LED_PIN, LOW);
+}
+4.	Add UART Logging:
+o	Log the indicator state using UART for debugging:
+C-programming:-
+uart_send("Left Indicator: %d, Right Indicator: %d, Hazard: %d\n",
+          model_output.LeftLED, model_output.RightLED, model_output.HazardState);
